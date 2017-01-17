@@ -6,18 +6,20 @@ namespace VirtualFlowListPanel
 {
 	public partial class VirtualFlowListPanelControl : UserControl
 	{
-		private readonly List<Control> Items;
+		private readonly List<Control> _items;
 
 		public VirtualFlowListPanelControl()
 		{
 			InitializeComponent();
 
-			AutoScroll = false;
+            ScrollBar.Minimum = 0;
+
+            AutoScroll = false;
 			VerticalScroll.Enabled = false;
 			VerticalScroll.Visible = false;
 			HorizontalScroll.Enabled = false;
 			HorizontalScroll.Visible = false;
-			Items = new List<Control>();
+            _items = new List<Control>();
 
 			Panel.FlowDirection = FlowDirection.TopDown;
 			Panel.WrapContents = false;
@@ -28,15 +30,21 @@ namespace VirtualFlowListPanel
 
 		public void Add(Control control)
 		{
-			Items.Add(control);
+            _items.Add(control);
 			UpdateView();
 		}
 
 		public void AddRange(Control[] controls)
 		{
-			Items.AddRange(controls);
+            _items.AddRange(controls);
 			UpdateView();
 		}
+
+	    public void Clear()
+	    {
+	        _items.Clear();
+            UpdateView();
+	    }
 
 		public void UpdateView()
 		{
@@ -46,15 +54,23 @@ namespace VirtualFlowListPanel
 				Panel.SuspendDrawing();
 				Panel.Controls.Clear();
 
-				ScrollBar.Maximum = Items.Count - 1;
+			    if (_items.Count > 0)
+			    {
+			        ScrollBar.Maximum = _items.Count - 1;
 
-				var elementCount = ScrollBar.Maximum - ScrollBar.Value < 10 ? ScrollBar.Maximum - ScrollBar.Value + 1 : 10;
-				Panel.Controls.AddRange(Items.GetRange(ScrollBar.Value, elementCount).ToArray());
+			        var elementCount = ScrollBar.Maximum - ScrollBar.Value < 10 ? ScrollBar.Maximum - ScrollBar.Value + 1 : 10;
+			        Panel.Controls.AddRange(_items.GetRange(ScrollBar.Value, elementCount).ToArray());
+			    }
+			    else
+			    {
+			        ScrollBar.Maximum = 0;
+			    }
 			}
 			finally
 			{
 				Panel.ResumeLayout();
 				Panel.ResumeDrawing();
+                Panel.Refresh();
 			}
 		}
 
